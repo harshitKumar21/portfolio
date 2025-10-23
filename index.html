@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Harshit Kumar Portfolio</title>
+    
+    <!-- Link to your existing CSS file -->
+    <!-- Make sure you have this file or the page won't be styled -->
+    <link rel="stylesheet" href="css/style.css" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- 
+      ALL FIREBASE CLIENT-SIDE SCRIPT IS REMOVED.
+      We no longer need it here. The backend will handle Firebase.
+    -->
+    
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <h2>Portfolio</h2>
+        </div>
+        <div class="nav-toggle" id="nav-toggle">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </div>
+        <ul class="nav-menu" id="nav-menu">
+          <li class="nav-item">
+            <a href="#home" class="nav-link">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="#about" class="nav-link">About</a>
+          </li>
+          <li class="nav-item">
+            <a href="#projects" class="nav-link">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a href="#skills" class="nav-link">Skills</a>
+          </li>
+          <li class="nav-item">
+            <a href="#contact" class="nav-link">Contact</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="main-container" id="main-container">
+      
+      <section class="section hero-section" id="home">
+        <div class="content">
+          <div class="hero-content">
+            <h1 class="hero-title">
+              
+              <span class="title-line">Harshit Kumar</span>
+            </h1>
+            <p class="hero-subtitle">
+              Crafting digital experiences with precision and innovation
+            </p>
+            <div class="hero-cta">
+              <a href="#projects" class="btn-primary">View My Work</a>
+              <a href="#contact" class="btn-secondary">Get In Touch</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="geometric-shape"></div>
+            <div class="floating-elements">
+              <div class="element element-1"></div>
+              <div class="element element-2"></div>
+              <div class="element element-3"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section about-section" id="about">
+        <div class="content">
+          <div class="section-header">
+            <span class="section-number">01</span>
+            <h2 class="section-title">About Me</h2>
+          </div>
+          <div class="about-content">
+            <div class="about-text">
+              <p class="about-description">
+                I'm a passionate developer who believes in creating experiences
+                that are not just functional, but beautiful and intuitive. With
+                a keen eye for design and a strong technical foundation, I bring
+                ideas to life through code.
+              </p>
+            </div>
+            <div class="about-image">
+              <!-- Using a placeholder for your image. Replace with your actual image path -->
+              <img
+                src="https://placehold.co/400x400/1a1a1a/ffffff?text=Harshit"
+                alt="Harshit"
+                class="profile-photo"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section projects-section" id="projects">
+        <div class="content">
+          <div class="section-header">
+            <span class="section-number">02</span>
+            <h2 class="section-title">Featured Projects</h2>
+          </div>
+          <div class="projects-grid">
+            <div class="project-card">
+              <div class="project-image">
+                <a
+                  href="https://talesbyme.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="https://placehold.co/600x400/1a1a1a/ffffff?text=Interactive+Tales"
+                    alt="Interactive Tales"
+                    class="project-img"
+                  />
+                </a>
+              </div>
+              <div class="project-info">
+                <h3 class="project-title">Interactive tales</h3>
+                <p class="project-description">
+                  Built an immersive storytelling web app with dynamic content
+                  loading and smooth animations. Have 3 genres and 6 branching
+                  story.
+                </p>
+                <div class="project-tags">
+                  <span class="tag">Next.js</span>
+                  <span class="tag">TypeScript</span>
+                  <span class="tag">Tailwind CSS</span>
+                </div>
+              </div>
+            </div>
+            <div class="project-card">
+              <div class="project-image">
+                <a
+                  href="https://v0-modern-memory-card-game.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src="https://placehold.co/600x400/1a1a1a/ffffff?text=Memory+Game"
+                    alt=" Memory Card Game"
+                    class="project-img"
+                  />
+                </a>
+              </div>
+              <div class="project-info">
+                <h3 class="project-title">Memory Card Game</h3>
+                <p class="project-description">
+                  Developed an Interactive memory card game with multiple levels
+                  and score tracking. Implemented smooth animations and
+                  responsive design.
+                </p>
+                <div class="project-tags">
+                  <span class="tag">Next.js</span>
+                  <span class="tag">TypeScript</span>
+                  <span class="tag">Tailwind CSS</span>
+                </div>
+              </div>
+            </div>
+            <div class="project-card">
+              <div class="project-image">
+                <img
+                  src="https://placehold.co/600x400/1a1a1a/ffffff?text=Brain+Tumor+Detection"
+                  alt=" Brain Tumor Detection using CNN"
+                  class="project-img"
+                />
+              </div>
+              <div class="project-info">
+                <h3 class="project-title">Brain Tumor Detection using CNN</h3>
+                <p class="project-description">
+                  Engineered a CNN model to accurately detect brain tumors from
+                  MRI scans, achieving high accuracy and reliability.
+                </D>
+                <div class="project-tags">
+                  <span class="tag">Python</span>
+                  <span class="tag">Machine Learning</span>
+                  <span class="tag">Multiple Python Libraries</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section skills-section" id="skills">
+        <div class="content">
+          <div class="section-header">
+            <span class="section-number">03</span>
+            <h2 class="section-title">Skills & Expertise</h2>
+          </div>
+          <div class="skills-content">
+            <div class="skills-categories">
+              <div class="skill-category">
+                <h3>Frontend</h3>
+                <ul class="skill-list">
+                  <li>HTML5 & CSS3</li>
+                  <li>JavaScript</li>
+                  <li>React.js</li>
+                  <li>TypeScript</li>
+                </ul>
+              </div>
+
+              <div class="skill-category">
+                <h3>Backend</h3>
+                <ul class="skill-list">
+                  <li>Node.js</li>
+                  <li>Python</li>
+                  <li>Firestore</li>
+                  <li>MongoDB</li>
+                  <li>SQL</li>
+                </ul>
+              </div>
+
+              <div class="skill-category">
+                <h3>Tools & Design</h3>
+                <ul class="skill-list">
+                  <li>Git & GitHub</li>
+                  <li>Firebase</li>
+                  <li>Wrap</li>
+                  <li>AI Tools</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section contact-section" id="contact">
+        <div class="content">
+          <div class="section-header">
+            <span class="section-number">04</span>
+            <h2 class="section-title">Get In Touch</h2>
+          </div>
+          <div class="contact-content">
+            <div class="contact-info">
+              <h3>Let's work together</h3>
+              <p>
+                I'm always interested in hearing about new projects and
+                opportunities.
+              </p>
+              <div class="contact-details">
+                <div class="contact-item">
+                  <span class="contact-label">Email</span>
+                  <span class="contact-value">harshitkumar9234@gmail.com</span>
+                </div>
+
+                <div class="contact-item">
+                  <span class="contact-label">Location</span>
+                  <span class="contact-value">Haldwani,Uttarkhand</span>
+                </div>
+              </div>
+              <div class="social-links">
+                <!-- FIXED LINKS -->
+                <a href="https://www.linkedin.com/in/harshit-kumar-2372/" class="social-link" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="https://github.com/harshitKumar21" class="social-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+              </div>
+            </div>
+            
+            <!-- This form ID is now used by our new script -->
+            <form class="contact-form" id="contact-form">
+              <div class="form-group">
+                <input type="text" id="name" name="name" placeholder="Your Name" required />
+              </div>
+              <div class="form-group">
+                <input type="email" id="email" name="email" placeholder="Your Email" required />
+              </div>
+              <div class="form-group">
+                <textarea
+                  id="message"
+                  name="message"
+                  placeholder="Your Message"
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+              <button type="submit" class="btn-primary" id="submit-btn">
+                <span id="btn-text">Send Message</span>
+                <span id="btn-loading" style="display: none;">Sending...</span>
+              </button>
+              <div id="form-message" class="form-message" style="display: none;"></div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="scroll-progress">
+      <div class="progress-bar"></div>
+    </div>
+
+    <div class="section-indicator">
+      <div class="indicator-dots">
+      </div>
+    </div>
+
+    
+    <!-- Link to your existing JS file -->
+    <script src="js/main.js"></script>
+    
+    <!-- 
+      NEW SCRIPT FOR CONTACT FORM
+      This script replaces the Firebase one.
+      It sends the form data to our new /api/contact backend.
+    -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const contactForm = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnLoading = document.getElementById('btn-loading');
+        const formMessage = document.getElementById('form-message');
+
+        contactForm.addEventListener('submit', async (e) => {
+          e.preventDefault(); // Stop the form from submitting normally
+
+          // Show loading state
+          btnText.style.display = 'none';
+          btnLoading.style.display = 'inline';
+          submitBtn.disabled = true;
+          formMessage.style.display = 'none';
+
+          // Get form data
+          const name = document.getElementById('name').value;
+          const email = document.getElementById('email').value;
+          const message = document.getElementById('message').value;
+
+          try {
+            // Send data to our new Node.js backend
+            const response = await fetch('/api/contact', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ name, email, message }),
+            });
+
+            if (response.ok) {
+              // Success!
+              formMessage.textContent = 'Message sent successfully!';
+              formMessage.style.color = 'green';
+              formMessage.style.display = 'block';
+              contactForm.reset();
+            } else {
+              // Handle server error
+              throw new Error('Server error, please try again.');
+            }
+
+          } catch (error) {
+            // Handle network or other errors
+            console.error('Error submitting form:', error);
+            formMessage.textContent = 'An error occurred. Please try again.';
+            formMessage.style.color = 'red';
+            formMessage.style.display = 'block';
+          } finally {
+            // Reset button
+            btnText.style.display = 'inline';
+            btnLoading.style.display = 'none';
+            submitBtn.disabled = false;
+          }
+        });
+      });
+    </script>
+    
+  </body>
+</html>
