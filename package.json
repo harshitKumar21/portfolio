@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/harshitkumar21/portfolio#readme",
   "dependencies": {
-    "@getbrevo/brevo": "^3.0.1"
+    "@getbrevo/brevo": "^3.0.1",
+    "firebase-admin": "^13.5.0"
   }
 }
