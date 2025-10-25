@@ -1,684 +1,379 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harshit Kumar | Portfolio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
-    
-    <style>
-        /* Base font */
-        html {
-            font-family: 'Inter', sans-serif;
-        }
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Harshit Kumar Portfolio</title>
+      
+      <!-- Link to your existing CSS file -->
+      <!-- Make sure you have this file or the page won't be styled -->
+      <link rel="stylesheet" href="css/style.css" />
+      
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+      
+      <!-- 
+        ALL FIREBASE CLIENT-SIDE SCRIPT IS REMOVED.
+        We no longer need it here. The backend will handle Firebase.
+      -->
+      
+    </head>
+    <body>
+      <nav class="navbar">
+        <div class="nav-container">
+          <div class="nav-logo">
+            <h2>Portfolio</h2>
+          </div>
+          <div class="nav-toggle" id="nav-toggle">
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </div>
+          <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item">
+              <a href="#home" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item">
+              <a href="#about" class="nav-link">About</a>
+            </li>
+            <li class="nav-item">
+              <a href="#projects" class="nav-link">Projects</a>
+            </li>
+            <li class="nav-item">
+              <a href="#skills" class="nav-link">Skills</a>
+            </li>
+            <li class="nav-item">
+              <a href="#contact" class="nav-link">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main class="main-container" id="main-container">
         
-        /* Native smooth scroll fallback */
-        @supports (scroll-behavior: smooth) {
-            html {
-                scroll-behavior: smooth;
-            }
-        }
-
-        /* --- Navbar Styling --- */
-        .navbar.scrolled {
-            background-color: rgba(17, 24, 39, 0.8); /* bg-gray-900 with opacity */
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        /* --- Mobile Menu --- */
-        #nav-menu {
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
-        }
-        #nav-menu.active {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        /* Mobile menu hamburger icon transition */
-        #nav-toggle .line {
-            transition: all 0.3s ease-in-out;
-        }
-        #nav-toggle.active .line-1 {
-            transform: rotate(45deg) translate(5px, 6px);
-        }
-        #nav-toggle.active .line-2 {
-            opacity: 0;
-        }
-        #nav-toggle.active .line-3 {
-            transform: rotate(-45deg) translate(5px, -6px);
-        }
-
-        /* --- Side Dot Navigation --- */
-        .dots-nav {
-            position: fixed;
-            top: 50%;
-            right: 1.25rem; /* 20px */
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem; /* 16px */
-            z-index: 40;
-        }
-        .dots-nav .dot {
-            width: 12px;
-            height: 12px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .dots-nav .dot.active {
-            background-color: #fff;
-            transform: scale(1.2);
-        }
-        .dots-nav .dot .dot-label {
-            position: absolute;
-            right: 150%;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: #fff;
-            color: #111827; /* bg-gray-900 */
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem; /* 12px */
-            font-weight: 600;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        .dots-nav .dot:hover .dot-label {
-            opacity: 1;
-        }
-        @media (max-width: 768px) {
-            .dots-nav {
-                display: none; /* Hide dots on mobile */
-            }
-        }
-
-        /* --- Scroll Progress Bar --- */
-        .progress-bar-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: transparent;
-            z-index: 50;
-        }
-        .progress-bar {
-            height: 100%;
-            background-color: #3b82f6; /* blue-500 */
-            width: 0;
-            transition: width 0.1s linear;
-        }
-
-        /* --- Scroll Reveal Animations --- */
-        .section {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
-        .section.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* --- Contact Form --- */
-        .form-message {
-            display: none;
-            padding: 0.75rem 1rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            margin-top: 1rem;
-        }
-        .form-message.success {
-            background-color: #d1fae5; /* green-100 */
-            color: #065f46; /* green-800 */
-        }
-        .form-message.error {
-            background-color: #fee2e2; /* red-100 */
-            color: #991b1b; /* red-800 */
-        }
-
-        /* Loading spinner */
-        #btn-loading {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-
-<body class="bg-gray-900 text-gray-100 antialiased">
-
-    <div class="progress-bar-container">
-        <div class="progress-bar"></div>
-    </div>
-
-    <header class="navbar fixed top-0 left-0 w-full z-40 transition-all duration-300">
-        <nav class="container mx-auto max-w-6xl px-4 py-4 flex justify-between items-center">
-            <a href="#home" class="text-2xl font-bold text-white nav-link">
-                Harshit<span class="text-blue-500">.</span>
-            </a>
-            
-            <div id="nav-menu" class="hidden md:flex md:items-center md:static absolute top-full left-0 w-full md:w-auto bg-gray-900 md:bg-transparent shadow-lg md:shadow-none p-4 md:p-0">
-                <ul class="flex flex-col md:flex-row md:space-x-8 space-y-4 md:space-y-0">
-                    <li><a href="#home" class="nav-link text-gray-300 hover:text-white transition-colors duration-300">Home</a></li>
-                    <li><a href="#about" class="nav-link text-gray-300 hover:text-white transition-colors duration-300">About</a></li>
-                    <li><a href="#projects" class="nav-link text-gray-300 hover:text-white transition-colors duration-300">Projects</a></li>
-                    <li><a href="#contact" class="nav-link text-gray-300 hover:text-white transition-colors duration-300">Contact</a></li>
-                </ul>
+        <section class="section hero-section" id="home">
+          <div class="content">
+            <div class="hero-content">
+              <h1 class="hero-title">
+                
+                <span class="title-line">Harshit Kumar</span>
+              </h1>
+              <p class="hero-subtitle">
+                Crafting digital experiences with precision and innovation
+              </p>
+              <div class="hero-cta">
+                <a href="#projects" class="btn-primary">View My Work</a>
+                <a href="#contact" class="btn-secondary">Get In Touch</a>
+              </div>
             </div>
-            
-            <button id="nav-toggle" class="md:hidden z-50 text-white" aria-label="Open navigation menu">
-                <div class="space-y-1.5">
-                    <span class="line line-1 block w-6 h-0.5 bg-white"></span>
-                    <span class="line line-2 block w-6 h-0.5 bg-white"></span>
-                    <span class="line line-3 block w-6 h-0.5 bg-white"></span>
-                </div>
-            </button>
-        </nav>
-    </header>
-
-    <aside class="dots-nav">
-        <a class="dot" href="#home" data-section-index="0">
-            <span class="dot-label">Home</span>
-        </a>
-        <a class="dot" href="#about" data-section-index="1">
-            <span class="dot-label">About</span>
-        </a>
-        <a class="dot" href="#projects" data-section-index="2">
-            <span class="dot-label">Projects</span>
-        </a>
-        <a class="dot" href="#contact" data-section-index="3">
-            <span class="dot-label">Contact</span>
-        </a>
-    </aside>
-
-    <main>
-        <section id="home" class="section h-screen flex items-center justify-center text-center px-4">
-            <div class="max-w-3xl">
-                <h1 class="text-5xl md:text-7xl font-bold text-white mb-4">Harshit Kumar</h1>
-                <p class="text-xl md:text-2xl text-gray-300 mb-8">Creative Frontend Developer & Web Designer</p>
-                <a href="#projects" class="nav-link bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-colors duration-300">
-                    View My Work
-                </a>
+            <div class="hero-visual">
+              <div class="geometric-shape"></div>
+              <div class="floating-elements">
+                <div class="element element-1"></div>
+                <div class="element element-2"></div>
+                <div class="element element-3"></div>
+              </div>
             </div>
+          </div>
         </section>
 
-        <section id="about" class="section min-h-screen py-20 px-4 flex items-center">
-            <div class="container mx-auto max-w-6xl grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <img src="https://placehold.co/600x600/1f2937/7dd3fc?text=Harshit" alt="Harshit Kumar" class="rounded-lg shadow-2xl w-full max-w-md mx-auto">
-                </div>
-                <div>
-                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">About Me</h2>
-                    <p class="text-gray-300 text-lg mb-4">
-                        I'm a passionate web developer with a keen eye for design and a love for creating intuitive, dynamic user experiences. With a strong foundation in HTML, CSS, and JavaScript, I specialize in building modern, responsive websites.
-                    </p>
-                    <p class="text-gray-300 text-lg">
-                        From concept to deployment, I enjoy every part of the development process. When I'm not coding, you can find me exploring new technologies or working on personal projects.
-                    </p>
-                </div>
+        <section class="section about-section" id="about">
+          <div class="content">
+            <div class="section-header">
+              <span class="section-number">01</span>
+              <h2 class="section-title">About Me</h2>
             </div>
-        </section>
-
-        <section id="projects" class="section min-h-screen py-20 px-4">
-            <div class="container mx-auto max-w-6xl">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-12 text-center">My Projects</h2>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                        <img src="https://placehold.co/600x400/111827/3b82f6?text=Project+One" alt="Project One" class="w-full h-48 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Portfolio Website</h3>
-                            <p class="text-gray-400 mb-4">The very portfolio you're looking at, built with HTML, Tailwind, and Firebase.</p>
-                            <a href="#" class="text-blue-400 hover:text-blue-300 font-medium">View Code</a>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                        <img src="https://placehold.co/600x400/111827/3b82f6?text=Project+Two" alt="Project Two" class="w-full h-48 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">E-commerce App</h3>
-                            <p class="text-gray-400 mb-4">A concept e-commerce site built with React and Firebase.</p>
-                            <a href="#" class="text-blue-400 hover:text-blue-300 font-medium">View Demo</a>
-                        </div>
-                    </div>
-                    <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300">
-                        <img src="https://placehold.co/600x400/111827/3b82f6?text=Project+Three" alt="Project Three" class="w-full h-48 object-cover">
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold text-white mb-2">Task Manager</h3>
-                            <p class="text-gray-400 mb-4">A simple todo list app with user authentication and Firestore.</p>
-                            <a href="#" class="text-blue-400 hover:text-blue-300 font-medium">View Code</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="contact" class="section min-h-screen py-20 px-4 flex items-center">
-            <div class="container mx-auto max-w-3xl">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-8 text-center">Get In Touch</h2>
-                <p class="text-gray-300 text-lg text-center mb-12">
-                    Have a question or want to work together? Fill out the form below, and I'll get back to you as soon as possible.
+            <div class="about-content">
+              <div class="about-text">
+                <p class="about-description">
+                  I'm a passionate developer who believes in creating experiences
+                  that are not just functional, but beautiful and intuitive. With
+                  a keen eye for design and a strong technical foundation, I bring
+                  ideas to life through code.
                 </p>
-                <form id="contact-form" class="bg-gray-800 p-8 rounded-lg shadow-2xl">
-                    <div class="mb-6">
-                        <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Name</label>
-                        <input type="text" id="name" name="name" class="w-full px-4 py-2 bg-gray-700 text-white rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <div class="mb-6">
-                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                        <input type="email" id="email" name="email" class="w-full px-4 py-2 bg-gray-700 text-white rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    </div>
-                    <div class="mb-6">
-                        <label for="message" class="block text-sm font-medium text-gray-300 mb-2">Message</label>
-                        <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 bg-gray-700 text-white rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" id="submit-btn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span id="btn-text">Send Message</span>
-                            <div id="btn-loading" class="spinner"></div>
-                        </button>
-                    </div>
-                </form>
-                <div id="form-message" class="form-message"></div>
+              </div>
+              <div class="about-image">
+                <!-- Using a placeholder for your image. Replace with your actual image path -->
+                <img
+                  src="https://placehold.co/400x400/1a1a1a/ffffff?text=Harshit"
+                  alt="Harshit"
+                  class="profile-photo"
+                />
+              </div>
             </div>
+          </div>
         </section>
-    </main>
 
-    <footer class="text-center py-8 border-t border-gray-800">
-        <p class="text-gray-500">&copy; 2025 Harshit Kumar. All rights reserved.</p>
-    </footer>
+        <section class="section projects-section" id="projects">
+          <div class="content">
+            <div class="section-header">
+              <span class="section-number">02</span>
+              <h2 class="section-title">Featured Projects</h2>
+            </div>
+            <div class="projects-grid">
+              <div class="project-card">
+                <div class="project-image">
+                  <a
+                    href="https://talesbyme.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="https://placehold.co/600x400/1a1a1a/ffffff?text=Interactive+Tales"
+                      alt="Interactive Tales"
+                      class="project-img"
+                    />
+                  </a>
+                </div>
+                <div class="project-info">
+                  <h3 class="project-title">Interactive tales</h3>
+                  <p class="project-description">
+                    Built an immersive storytelling web app with dynamic content
+                    loading and smooth animations. Have 3 genres and 6 branching
+                    story.
+                  </p>
+                  <div class="project-tags">
+                    <span class="tag">Next.js</span>
+                    <span class="tag">TypeScript</span>
+                    <span class="tag">Tailwind CSS</span>
+                  </div>
+                </div>
+              </div>
+              <div class="project-card">
+                <div class="project-image">
+                  <a
+                    href="https://v0-modern-memory-card-game.vercel.app/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src="https://placehold.co/600x400/1a1a1a/ffffff?text=Memory+Game"
+                      alt=" Memory Card Game"
+                      class="project-img"
+                    />
+                  </a>
+                </div>
+                <div class="project-info">
+                  <h3 class="project-title">Memory Card Game</h3>
+                  <p class="project-description">
+                    Developed an Interactive memory card game with multiple levels
+                    and score tracking. Implemented smooth animations and
+                    responsive design.
+                  </p>
+                  <div class="project-tags">
+                    <span class="tag">Next.js</span>
+                    <span class="tag">TypeScript</span>
+                    <span class="tag">Tailwind CSS</span>
+                  </div>
+                </div>
+              </div>
+              <div class="project-card">
+                <div class="project-image">
+                  <img
+                    src="https://placehold.co/600x400/1a1a1a/ffffff?text=Brain+Tumor+Detection"
+                    alt=" Brain Tumor Detection using CNN"
+                    class="project-img"
+                  />
+                </div>
+                <div class="project-info">
+                  <h3 class="project-title">Brain Tumor Detection using CNN</h3>
+                  <p class="project-description">
+                    Engineered a CNN model to accurately detect brain tumors from
+                    MRI scans, achieving high accuracy and reliability.
+                  </D>
+                  <div class="project-tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">Machine Learning</span>
+                    <span class="tag">Multiple Python Libraries</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
+        <section class="section skills-section" id="skills">
+          <div class="content">
+            <div class="section-header">
+              <span class="section-number">03</span>
+              <h2 class="section-title">Skills & Expertise</h2>
+            </div>
+            <div class="skills-content">
+              <div class="skills-categories">
+                <div class="skill-category">
+                  <h3>Frontend</h3>
+                  <ul class="skill-list">
+                    <li>HTML5 & CSS3</li>
+                    <li>JavaScript</li>
+                    <li>React.js</li>
+                    <li>TypeScript</li>
+                  </ul>
+                </div>
 
-    <script type="module">
-      // Import the functions you need from the SDKs
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-      import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import { getFirestore, collection, addDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+                <div class="skill-category">
+                  <h3>Backend</h3>
+                  <ul class="skill-list">
+                    <li>Node.js</li>
+                    <li>Python</li>
+                    <li>Firestore</li>
+                    <li>MongoDB</li>
+                    <li>SQL</li>
+                  </ul>
+                </div>
 
-      // --- Use Environment Variables ---
-      // These variables are securely provided by the hosting environment.
-      const firebaseConfig = typeof __firebase_config !== 'undefined' 
-        ? JSON.parse(__firebase_config)
-        : { /* Fallback config for local testing, as provided by user */
-            apiKey: "AIzaSyA1bJvxJeFsM-uXUOWUjd47HTdrgznI3Wo",
-            authDomain: "portfolio-harshit24.firebaseapp.com",
-            databaseURL: "https://portfolio-harshit24-default-rtdb.firebaseio.com",
-            projectId: "portfolio-harshit24",
-            storageBucket: "portfolio-harshit24.firebasestorage.app",
-            messagingSenderId: "479457851561",
-            appId: "1:479457851561:web:bb8c69aee1a3527c8991b8",
-            measurementId: "G-HJ6BEQKWN9"
-          };
-          
-      const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-      // We prioritize the projectId from the config if it's available
-      const appId = firebaseConfig.projectId || (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id');
+                <div class="skill-category">
+                  <h3>Tools & Design</h3>
+                  <ul class="skill-list">
+                    <li>Git & GitHub</li>
+                    <li>Firebase</li>
+                    <li>Wrap</li>
+                    <li>AI Tools</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      // Initialize Firebase
-      try {
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        
-        // Sign in
-        if (initialAuthToken) {
-          await signInWithCustomToken(auth, initialAuthToken);
-        } else {
-          await signInAnonymously(auth);
-        }
-        
-        const userId = auth.currentUser ? auth.currentUser.uid : 'anonymous-user';
+        <section class="section contact-section" id="contact">
+          <div class="content">
+            <div class="section-header">
+              <span class="section-number">04</span>
+              <h2 class="section-title">Get In Touch</h2>
+            </div>
+            <div class="contact-content">
+              <div class="contact-info">
+                <h3>Let's work together</h3>
+                <p>
+                  I'm always interested in hearing about new projects and
+                  opportunities.
+                </p>
+                <div class="contact-details">
+                  <div class="contact-item">
+                    <span class="contact-label">Email</span>
+                    <span class="contact-value">harshitkumar9234@gmail.com</span>
+                  </div>
 
-        // --- THIS IS THE CRITICAL PART ---
-        // Attach the functions your main.js file needs to the window object.
-        window.firebase = {
-          db: db,
-          // We curry the collection function to include the required path
-          collection: (collectionName) => {
-            // Using the private user data path as a default for contact forms
-            // This now correctly uses your projectId 'portfolio-harshit24' from the config
-            const path = `artifacts/${appId}/users/${userId}/${collectionName}`;
-            return collection(db, path);
-          },
-          addDoc: addDoc
-        };
-        
-        console.log("Firebase initialized successfully. UserID:", userId);
+                  <div class="contact-item">
+                    <span class="contact-label">Location</span>
+                    <span class="contact-value">Haldwani,Uttarkhand</span>
+                  </div>
+                </div>
+                <div class="social-links">
+                  <!-- FIXED LINKS -->
+                  <a href="https://www.linkedin.com/in/harshit-kumar-2372/" class="social-link" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                  <a href="https://github.com/harshitKumar21" class="social-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+                </div>
+              </div>
+              
+              <!-- This form ID is now used by our new script -->
+              <form class="contact-form" id="contact-form">
+                <div class="form-group">
+                  <input type="text" id="name" name="name" placeholder="Your Name" required />
+                </div>
+                <div class="form-group">
+                  <input type="email" id="email" name="email" placeholder="Your Email" required />
+                </div>
+                <div class="form-group">
+                  <textarea
+                    id="message"
+                    name="message"
+                    placeholder="Your Message"
+                    rows="5"
+                    required
+                  ></textarea>
+                </div>
+                <button type="submit" class="btn-primary" id="submit-btn">
+                  <span id="btn-text">Send Message</span>
+                  <span id="btn-loading" style="display: none;">Sending...</span>
+                </button>
+                <div id="form-message" class="form-message" style="display: none;"></div>
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
 
-      } catch (error) {
-        console.error("Error initializing Firebase:", error);
-      }
-    </script>
+      <div class="scroll-progress">
+        <div class="progress-bar"></div>
+      </div>
 
-    <script defer>
+      <div class="section-indicator">
+        <div class="indicator-dots">
+        </div>
+      </div>
+
+      
+      <!-- Link to your existing JS file -->
+      <script src="js/main.js"></script>
+      
+      <!-- 
+        NEW SCRIPT FOR CONTACT FORM
+        This script replaces the Firebase one.
+        It sends the form data to our new /api/contact backend.
+      -->
+      <script>
         document.addEventListener('DOMContentLoaded', () => {
-    
-            // 1. Initialize Lenis (guard for global availability)
-            const LenisCtor = window.Lenis;
-            let lenis = null;
-            if (typeof LenisCtor === 'function') {
-                lenis = new LenisCtor({
-                    duration: 1.2,
-                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                    smoothTouch: true,
-                });
-            } else {
-                console.warn('Lenis is not available; falling back to native smooth scrolling.');
-                // Enable native smooth behavior
-                if ('scrollBehavior' in document.documentElement.style) {
-                    document.documentElement.style.scrollBehavior = 'smooth';
-                }
-            }
+          const contactForm = document.getElementById('contact-form');
+          const submitBtn = document.getElementById('submit-btn');
+          const btnText = document.getElementById('btn-text');
+          const btnLoading = document.getElementById('btn-loading');
+          const formMessage = document.getElementById('form-message');
 
-            // 2. Lenis Scroll Frame Loop (Request Animation Frame)
-            if (lenis) {
-                function raf(time) {
-                    lenis.raf(time);
-                    requestAnimationFrame(raf);
-                }
-                requestAnimationFrame(raf);
-            }
-            
-            // 3. Mobile Menu Toggle
-            const navToggle = document.getElementById('nav-toggle');
-            const navMenu = document.getElementById('nav-menu');
-            const navbar = document.querySelector('.navbar');
-            const closeWithEscape = (e) => {
-                if (e.key === 'Escape') {
-                    closeMenu();
-                }
-            };
-            
-            const closeMenu = () => {
-                navToggle.classList.remove('active');
-                navMenu.classList.remove('active');
-                document.removeEventListener('keydown', closeWithEscape);
-            };
-            
-            const openMenu = () => {
-                navToggle.classList.add('active');
-                navMenu.classList.add('active');
-                document.addEventListener('keydown', closeWithEscape);
-            };
-            
-            if (navToggle && navMenu) {
-                navToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    if (navMenu.classList.contains('active')) {
-                        closeMenu();
-                    } else {
-                        openMenu();
-                    }
-                });
-                
-                // Close menu when clicking on a link
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.addEventListener('click', () => {
-                        closeMenu();
-                    });
-                });
-                
-                // Close menu when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (navbar && !navbar.contains(e.target) && navMenu.classList.contains('active')) {
-                        closeMenu();
-                    }
-                });
-            }
-            
-            // 4. Navbar scroll effect
-            let lastScrollY = window.scrollY;
-            window.addEventListener('scroll', () => {
-                const currentScrollY = window.scrollY;
-                
-                if (navbar && currentScrollY > 100) {
-                    navbar.classList.add('scrolled');
-                } else if (navbar) {
-                    navbar.classList.remove('scrolled');
-                }
-                
-                lastScrollY = currentScrollY;
-            });
-            
-            
-            // 5. Setup Elements and Logic
-            
-            // Use the official Lenis scroll event to handle all logic
-            const handleScrollUpdate = (eventLike) => {
-                const sections = document.querySelectorAll('.section');
-                const navLinks = document.querySelectorAll('.nav-link');
-                const indicatorDots = document.querySelectorAll('.dot');
-                const progressBar = document.querySelector('.progress-bar');
-                
-                const scrollPosition = lenis ? eventLike.scroll : window.scrollY;
-                const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-                const progress = totalHeight > 0 ? scrollPosition / totalHeight : 0;
-                
-                // Update Scroll Progress Bar
-                if (progressBar) {
-                    progressBar.style.width = `${progress * 100}%`;
-                }
+          contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop the form from submitting normally
 
-                let activeIndex = 0;
-                sections.forEach((section, index) => {
-                    const rect = section.getBoundingClientRect();
-                    
-                    // Logic for scroll-reveal class (.active)
-                    if (rect.top < window.innerHeight * 0.8 && rect.bottom > 0) {
-                        if (!section.classList.contains('active')) {
-                            section.classList.add('active');
-                        }
-                    } 
-                    // Note: You might not want the 'else' part to remove 'active'
-                    // if you want animations to only happen once.
-                    // else {
-                    //    section.classList.remove('active');
-                    // }
+            // Show loading state
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline';
+            submitBtn.disabled = true;
+            formMessage.style.display = 'none';
 
-                    // Logic for indicator activation
-                    if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= window.innerHeight * 0.5) {
-                        activeIndex = index;
-                    }
-                });
-                
-                // Update Visual Indicators
-                indicatorDots.forEach((dot, index) => {
-                    dot.classList.remove('active');
-                    if (index === activeIndex) {
-                        dot.classList.add('active');
-                    }
-                });
-                
-                // Update Nav Links
-                navLinks.forEach(link => link.classList.remove('active'));
-                if (sections[activeIndex]) {
-                    const targetId = sections[activeIndex].id;
-                    const activeLink = document.querySelector(`.nav-link[href="#${targetId}"]`);
-                    if (activeLink) activeLink.classList.add('active');
-                }
-            };
+            // Get form data
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
 
-            if (lenis) {
-                lenis.on('scroll', handleScrollUpdate);
-            } else {
-                window.addEventListener('scroll', () => handleScrollUpdate({ scroll: window.scrollY }));
-                // Trigger once on load for fallback
-                handleScrollUpdate({ scroll: window.scrollY });
-            }
-            // Trigger once on load
-            handleScrollUpdate({ scroll: window.scrollY });
+            try {
+              // Send data to our new Node.js backend
+              const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email, message }),
+              });
 
-            // 6. Navigation Handlers (Uses Lenis.scrollTo)
-            
-            document.querySelectorAll('.dot, .nav-link').forEach(element => {
-                element.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    let targetElement;
-                    const href = element.getAttribute('href');
-                    
-                    if (element.classList.contains('dot')) {
-                        const index = parseInt(element.dataset.sectionIndex);
-                        targetElement = document.querySelectorAll('.section')[index];
-                    } else if (href) {
-                        targetElement = document.querySelector(href);
-                    }
-                    
-                    if (targetElement) {
-                        if (lenis) {
-                            // Offset accounts for fixed navbar height (approx 60-70px)
-                            lenis.scrollTo(targetElement, { duration: 1.5, offset: -60 });
-                        } else {
-                            // Fallback for native scrolling
-                            const targetTop = targetElement.getBoundingClientRect().top + window.scrollY - 60;
-                            window.scrollTo({ top: targetTop, behavior: 'smooth' });
-                        }
-                    }
-                });
-            });
+              if (response.ok) {
+                // Success!
+                formMessage.textContent = 'Message sent successfully!';
+                formMessage.style.color = 'green';
+                formMessage.style.display = 'block';
+                contactForm.reset();
+              } else {
+                // Handle server error
+                throw new Error('Server error, please try again.');
+              }
 
-            // 7. Firebase Contact Form Handler
-            const contactForm = document.getElementById('contact-form');
-            const submitBtn = document.getElementById('submit-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnLoading = document.getElementById('btn-loading');
-            const formMessage = document.getElementById('form-message');
-
-            if (contactForm) {
-                contactForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    // Get form data
-                    const name = document.getElementById('name').value.trim();
-                    const email = document.getElementById('email').value.trim();
-                    const message = document.getElementById('message').value.trim();
-                    
-                    // Validate form
-                    if (!name || !email || !message) {
-                        showMessage('Please fill in all fields.', 'error');
-                        return;
-                    }
-                    
-                    if (!isValidEmail(email)) {
-                        showMessage('Please enter a valid email address.', 'error');
-                        return;
-                    }
-                    
-                    // Show loading state
-                    setLoading(true);
-                    hideMessage();
-                    
-                    try {
-                        // Check if Firebase is available
-                        if (!window.firebase || !window.firebase.addDoc) {
-                            throw new Error('Firebase not initialized');
-                        }
-                        
-                        // Add document to Firestore with retry logic
-                        const docRef = await addDocumentWithRetry({
-                            name: name,
-                            email: email,
-                            message: message,
-                            timestamp: new Date(),
-                            userAgent: navigator.userAgent
-                        });
-                        
-                        console.log('Document written with ID: ', docRef.id);
-                        showMessage('Thank you! Your message has been sent successfully.', 'success');
-                        contactForm.reset();
-                        
-                    } catch (error) {
-                        console.error('Error adding document: ', error);
-                        
-                        if (error.message.includes('permission')) {
-                            showMessage('Database permission error. Please contact the site administrator.', 'error');
-                        } else if (error.message.includes('network') || error.message.includes('connection')) {
-                            showMessage('Network error. Please check your connection and try again.', 'error');
-                        } else {
-                            showMessage('Sorry, there was an error sending your message. Please try again.', 'error');
-                        }
-                    } finally {
-                        setLoading(false);
-                    }
-                });
+            } catch (error) {
+              // Handle network or other errors
+              console.error('Error submitting form:', error);
+              formMessage.textContent = 'An error occurred. Please try again.';
+              formMessage.style.color = 'red';
+              formMessage.style.display = 'block';
+            } finally {
+              // Reset button
+              btnText.style.display = 'inline';
+              btnLoading.style.display = 'none';
+              submitBtn.disabled = false;
             }
-            
-            // Helper functions
-            function setLoading(loading) {
-                if (submitBtn) submitBtn.disabled = loading;
-                if (btnText) btnText.style.display = loading ? 'none' : 'inline';
-                if (btnLoading) btnLoading.style.display = loading ? 'inline' : 'none';
-            }
-            
-            function showMessage(text, type) {
-                if (formMessage) {
-                    formMessage.textContent = text;
-                    formMessage.className = `form-message ${type}`;
-                    formMessage.style.display = 'block';
-                }
-                
-                if (type === 'success') {
-                    setTimeout(() => {
-                        hideMessage();
-                    }, 5000);
-                }
-            }
-            
-            function hideMessage() {
-                if (formMessage) formMessage.style.display = 'none';
-            }
-            
-            function isValidEmail(email) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return emailRegex.test(email);
-            }
-            
-            async function addDocumentWithRetry(data, maxRetries = 3) {
-                for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                    try {
-                        // 'contact-submissions' is the name of your collection
-                        const docRef = await window.firebase.addDoc(
-                            window.firebase.collection('contact-submissions'), 
-                            data
-                        );
-                        return docRef;
-                    } catch (error) {
-                        console.warn(`Attempt ${attempt} failed:`, error);
-                        
-                        if (attempt === maxRetries) {
-                            throw error;
-                        }
-                        
-                        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
-                    }
-                }
-            }
-
-            // (The getClientIP function was removed as it's not used in the retry function)
-
+          });
         });
-    </script>
-</body>
-</html>
+      </script>
+      
+    </body>
+  </html>
