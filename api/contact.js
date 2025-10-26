@@ -3,45 +3,15 @@
  * Saves submission to Firebase Firestore and sends email via Brevo.
  * Handles POST requests only. Reads secrets from Environment Variables.
  * Uses CommonJS module syntax (`require`, `module.exports`).
+ * FINAL VERSION - Addresses missing ApiClient issue.
  */
 
-// --- DEBUGGING: Log right after require ---
-let BrevoSDK;
-let BrevoAPI; // Variable to hold the actual SDK exports
-try {
-    BrevoSDK = require("@getbrevo/brevo");
-    console.log("[DEBUG] Raw BrevoSDK object after require:", BrevoSDK); // Log the entire object
-
-    // --- ATTEMPT TO FIND THE CORRECT EXPORTS ---
-    // Sometimes CommonJS might wrap ESM default exports
-    if (BrevoSDK && BrevoSDK.ApiClient) {
-        BrevoAPI = BrevoSDK; // Looks like direct export worked
-        console.log("[DEBUG] Found ApiClient directly on BrevoSDK.");
-    } else if (BrevoSDK && BrevoSDK.default && BrevoSDK.default.ApiClient) {
-        BrevoAPI = BrevoSDK.default; // Exports might be under .default
-        console.log("[DEBUG] Found ApiClient under BrevoSDK.default.");
-    } else {
-        console.warn("[DEBUG] Could not find ApiClient directly or under .default. Will attempt to proceed.");
-        BrevoAPI = BrevoSDK; // Fallback to original, might fail later but allows logging
-    }
-    // ---------------------------------------------
-
-    // Check specific properties based on BrevoAPI
-    console.log("[DEBUG] BrevoAPI.ApiClient:", BrevoAPI ? BrevoAPI.ApiClient : 'BrevoAPI is undefined/null');
-    console.log("[DEBUG] BrevoAPI keys:", BrevoAPI ? Object.keys(BrevoAPI) : 'BrevoAPI is undefined/null'); // Log available keys
-
-} catch (error) {
-    console.error("[DEBUG] Failed to require @getbrevo/brevo:", error);
-    BrevoAPI = null; // Ensure BrevoAPI is null if require fails
-}
-// ------------------------------------------
-
+const BrevoSDK = require("@getbrevo/brevo");
 const admin = require('firebase-admin');
 
 // --- Firebase Admin Initialization ---
-let db; // Define db outside the try block
+let db;
 try {
-    // Check if Firebase Admin is already initialized
     if (!admin.apps.length) {
         if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
              throw new Error("Firebase Service Account JSON (FIREBASE_SERVICE_ACCOUNT) is not configured in environment variables.");
@@ -54,10 +24,10 @@ try {
     } else {
         console.log("Firebase Admin already initialized");
     }
-    db = admin.firestore(); // Assign db after initialization
+    db = admin.firestore();
 } catch (error) {
     console.error('Firebase Admin Initialization Error:', error);
-    db = null; // Set db to null if initialization fails
+    db = null;
 }
 // ------------------------------------
 
@@ -90,7 +60,6 @@ module.exports = async (req, res) => {
     }
 
     // 4. Prepare Firestore and Brevo operations
-    // Ensure db is initialized before attempting to save
     const firestorePromise = db ? saveToFirestore(name, email, message) : Promise.resolve({ success: false, error: "Firestore DB not initialized" });
     const brevoPromise = sendBrevoEmail(name, email, message);
 
@@ -120,7 +89,6 @@ module.exports = async (req, res) => {
 
 // --- Helper Function: Save to Firestore ---
 async function saveToFirestore(name, email, message) {
-    // db is now checked in the main handler before calling this
     try {
         const submissionRef = db.collection('contact-submissions').doc();
         await submissionRef.set({
@@ -141,57 +109,42 @@ async function saveToFirestore(name, email, message) {
 // --- Helper Function: Send Email via Brevo ---
 async function sendBrevoEmail(name, email, message) {
     try {
-        // --- Configure Brevo Client ---
-        console.log("[DEBUG] Entering sendBrevoEmail function.");
+        console.log("[Brevo] Entering sendBrevoEmail function.");
 
-        // Use BrevoAPI which holds the correct exports (hopefully)
-        if (!BrevoAPI) {
-             console.error("[DEBUG] BrevoAPI is undefined or null at check (require likely failed).");
-             throw new Error("Brevo SDK was not loaded correctly.");
+        // Ensure SDK loaded
+        if (!BrevoSDK) {
+             throw new Error("Brevo SDK require failed earlier.");
         }
-        if (!BrevoAPI.ApiClient) {
-             console.error("[DEBUG] BrevoAPI.ApiClient is undefined. BrevoAPI keys:", Object.keys(BrevoAPI));
-             throw new Error("Brevo SDK loaded, but ApiClient property is missing.");
-        }
-        console.log("[DEBUG] BrevoAPI.ApiClient seems available.");
 
-        let defaultClient = BrevoAPI.ApiClient.instance; // Use BrevoAPI here
-        if (!defaultClient) {
-            console.error("[DEBUG] BrevoAPI.ApiClient.instance is undefined.");
-            throw new Error("Brevo ApiClient instance is not available.");
+        // --- NEW AUTHENTICATION METHOD ---
+        // 1. Instantiate the specific API you need
+        if (!BrevoSDK.TransactionalEmailsApi) {
+             throw new Error("BrevoSDK.TransactionalEmailsApi class is missing.");
         }
-        console.log("[DEBUG] defaultClient instance obtained.");
+        const apiInstance = new BrevoSDK.TransactionalEmailsApi();
+        console.log("[Brevo] TransactionalEmailsApi instance created.");
 
-        let apiKeyAuth = defaultClient.authentications["api-key"];
-        if (!apiKeyAuth) {
-             console.error("[DEBUG] defaultClient.authentications['api-key'] is undefined.");
-             throw new Error("Brevo API key authentication setup failed.");
+        // 2. Access authentications *from the apiInstance*
+        if (!apiInstance.authentications || !apiInstance.authentications['api-key']) {
+             throw new Error("Could not access authentications object on apiInstance.");
         }
-        console.log("[DEBUG] apiKeyAuth object obtained.");
+        let apiKeyAuth = apiInstance.authentications['api-key'];
+        console.log("[Brevo] apiKeyAuth object obtained from apiInstance.");
 
+        // 3. Set the API key
         if (!process.env.SENDINBLUE_API_KEY) {
-            console.error("[DEBUG] SENDINBLUE_API_KEY environment variable is missing.");
             throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured in environment variables.");
         }
         apiKeyAuth.apiKey = process.env.SENDINBLUE_API_KEY;
-        console.log("[DEBUG] Brevo API Key assigned from environment variable.");
-        // -----------------------------
+        console.log("[Brevo] API Key assigned from environment variable.");
+        // --- END OF NEW AUTH METHOD ---
 
-        // Use BrevoAPI for classes too
-        if (!BrevoAPI.TransactionalEmailsApi) {
-            console.error("[DEBUG] BrevoAPI.TransactionalEmailsApi is undefined.");
-            throw new Error("Brevo TransactionalEmailsApi class is missing.");
-        }
-        const apiInstance = new BrevoAPI.TransactionalEmailsApi();
-        console.log("[DEBUG] TransactionalEmailsApi instance created.");
-
-        if (!BrevoAPI.SendSmtpEmail) {
-            console.error("[DEBUG] BrevoAPI.SendSmtpEmail is undefined.");
+        // Ensure SendSmtpEmail class exists
+        if (!BrevoSDK.SendSmtpEmail) {
             throw new Error("Brevo SendSmtpEmail class is missing.");
         }
-        const sendSmtpEmail = new BrevoAPI.SendSmtpEmail();
-        console.log("[DEBUG] SendSmtpEmail instance created.");
-
+        const sendSmtpEmail = new BrevoSDK.SendSmtpEmail();
+        console.log("[Brevo] SendSmtpEmail instance created.");
 
         // Sender details
         const SENDER_EMAIL = "harshitkumar9234@gmail.com";
@@ -212,16 +165,16 @@ async function sendBrevoEmail(name, email, message) {
             { email: "harshitkumar9234@gmail.com", name: "Harshit Kumar" },
         ];
         sendSmtpEmail.replyTo = { email: email, name: name };
-        console.log("[DEBUG] Email object configured:", JSON.stringify(sendSmtpEmail));
+        console.log("[Brevo] Email object configured.");
 
         // Send the email
-        console.log("[DEBUG] Calling apiInstance.sendTransacEmail...");
+        console.log("[Brevo] Calling apiInstance.sendTransacEmail...");
         const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
         console.log("Brevo API called successfully. Result:", data);
         return { success: true, result: data };
 
     } catch (error) {
-        console.error("[DEBUG] Error caught in sendBrevoEmail:", error);
+        console.error("Error sending email via Brevo:", error);
         return { success: false, error: error.message || 'Brevo email failed' };
     }
 }
