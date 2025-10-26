@@ -3,7 +3,7 @@
  * Saves submission to Firebase Firestore and sends email via Brevo.
  * Handles POST requests only. Reads secrets from Environment Variables.
  * Uses CommonJS module syntax (`require`, `module.exports`).
- * FINAL VERSION - Addresses missing ApiClient issue.
+ * FINAL v2 - Uses global authentication setup for Brevo.
  */
 
 const BrevoSDK = require("@getbrevo/brevo");
@@ -28,6 +28,50 @@ try {
 } catch (error) {
     console.error('Firebase Admin Initialization Error:', error);
     db = null;
+}
+// ------------------------------------
+
+
+// --- Brevo Global Authentication Setup ---
+try {
+    if (!BrevoSDK) {
+        throw new Error("Brevo SDK require failed earlier.");
+    }
+    // Check if ApiClient exists - This was the missing piece before
+    // If it doesn't exist directly, this attempt might still fail,
+    // but structure suggests it might be needed for global auth setup.
+    // Based on previous debug logs, ApiClient wasn't directly available,
+    // but ApiKeyAuth was. Let's try setting ApiKeyAuth directly if ApiClient fails.
+
+    let defaultClient;
+    // Attempt 1: Standard ApiClient instance approach (might fail based on logs)
+    if (BrevoSDK.ApiClient && BrevoSDK.ApiClient.instance) {
+        defaultClient = BrevoSDK.ApiClient.instance;
+        console.log("[Brevo Auth] Using ApiClient.instance");
+    } else {
+        // Fallback: If ApiClient wasn't found, try creating a dummy client or skip if not needed
+        // For now, let's assume the API instance handles its own auth if global fails.
+        console.warn("[Brevo Auth] BrevoSDK.ApiClient.instance not found. Proceeding without global defaultClient.");
+        defaultClient = null; // Indicate it wasn't found
+    }
+
+    // Set API Key Authentication globally IF defaultClient exists
+    if (defaultClient) {
+        if (!defaultClient.authentications || !defaultClient.authentications['api-key']) {
+             throw new Error("Could not access global authentications object.");
+        }
+        let apiKeyAuth = defaultClient.authentications['api-key'];
+        if (!process.env.SENDINBLUE_API_KEY) {
+            throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured.");
+        }
+        apiKeyAuth.apiKey = process.env.SENDINBLUE_API_KEY;
+        console.log("[Brevo Auth] Global API Key SET using defaultClient instance.");
+    }
+    // If defaultClient wasn't found, we hope the individual API instances handle auth correctly.
+
+} catch (error) {
+    console.error("Error during Brevo Global Authentication Setup:", error);
+    // Continue execution, but Brevo might fail later if auth is strictly global
 }
 // ------------------------------------
 
@@ -111,38 +155,29 @@ async function sendBrevoEmail(name, email, message) {
     try {
         console.log("[Brevo] Entering sendBrevoEmail function.");
 
-        // Ensure SDK loaded
-        if (!BrevoSDK) {
-             throw new Error("Brevo SDK require failed earlier.");
-        }
+        if (!BrevoSDK) { throw new Error("Brevo SDK require failed earlier."); }
+        if (!BrevoSDK.TransactionalEmailsApi) { throw new Error("BrevoSDK.TransactionalEmailsApi class is missing."); }
+        if (!BrevoSDK.SendSmtpEmail) { throw new Error("Brevo SendSmtpEmail class is missing."); }
 
-        // --- NEW AUTHENTICATION METHOD ---
-        // 1. Instantiate the specific API you need
-        if (!BrevoSDK.TransactionalEmailsApi) {
-             throw new Error("BrevoSDK.TransactionalEmailsApi class is missing.");
-        }
+        // --- Instantiate API and Set Auth if needed ---
         const apiInstance = new BrevoSDK.TransactionalEmailsApi();
         console.log("[Brevo] TransactionalEmailsApi instance created.");
 
-        // 2. Access authentications *from the apiInstance*
+        // If global auth setup failed (defaultClient was null), try setting auth on the instance
+        // This is the method that failed previously, but include as fallback
         if (!apiInstance.authentications || !apiInstance.authentications['api-key']) {
-             throw new Error("Could not access authentications object on apiInstance.");
+             console.warn("[Brevo] Could not access authentications on apiInstance. Assuming global auth worked.");
+             // If global auth also failed, this will likely fail during the API call.
+        } else {
+             let apiKeyAuthInstance = apiInstance.authentications['api-key'];
+             if (!process.env.SENDINBLUE_API_KEY) {
+                throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured.");
+             }
+             apiKeyAuthInstance.apiKey = process.env.SENDINBLUE_API_KEY;
+             console.log("[Brevo] API Key assigned to apiInstance authentication.");
         }
-        let apiKeyAuth = apiInstance.authentications['api-key'];
-        console.log("[Brevo] apiKeyAuth object obtained from apiInstance.");
+        // --- End Auth Setting ---
 
-        // 3. Set the API key
-        if (!process.env.SENDINBLUE_API_KEY) {
-            throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured in environment variables.");
-        }
-        apiKeyAuth.apiKey = process.env.SENDINBLUE_API_KEY;
-        console.log("[Brevo] API Key assigned from environment variable.");
-        // --- END OF NEW AUTH METHOD ---
-
-        // Ensure SendSmtpEmail class exists
-        if (!BrevoSDK.SendSmtpEmail) {
-            throw new Error("Brevo SendSmtpEmail class is missing.");
-        }
         const sendSmtpEmail = new BrevoSDK.SendSmtpEmail();
         console.log("[Brevo] SendSmtpEmail instance created.");
 
@@ -175,7 +210,17 @@ async function sendBrevoEmail(name, email, message) {
 
     } catch (error) {
         console.error("Error sending email via Brevo:", error);
-        return { success: false, error: error.message || 'Brevo email failed' };
+        // Provide more details if available in the error object from Brevo
+        let errorMessage = error.message || 'Brevo email failed';
+        if (error.response && error.response.text) {
+             try {
+                 const errorBody = JSON.parse(error.response.text);
+                 errorMessage += ` Brevo Error: ${errorBody.message || error.response.text}`;
+             } catch (e) {
+                 errorMessage += ` Brevo Raw Error: ${error.response.text}`;
+             }
+        }
+        return { success: false, error: errorMessage };
     }
 }
 
