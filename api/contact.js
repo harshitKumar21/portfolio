@@ -3,10 +3,11 @@
  * Saves submission to Firebase Firestore and sends email via Brevo.
  * Handles POST requests only. Reads secrets from Environment Variables.
  * Uses CommonJS module syntax (`require`, `module.exports`).
- * FINAL v2 - Uses global authentication setup for Brevo.
+ * FINAL v3 - Uses the official `sib-api-v3-sdk` package.
  */
 
-const BrevoSDK = require("@getbrevo/brevo");
+// Use the official Brevo SDK package name from their documentation
+const SibApiV3Sdk = require('sib-api-v3-sdk');
 const admin = require('firebase-admin');
 
 // --- Firebase Admin Initialization ---
@@ -32,46 +33,35 @@ try {
 // ------------------------------------
 
 
-// --- Brevo Global Authentication Setup ---
+// --- Brevo Authentication Setup (using sib-api-v3-sdk pattern) ---
+let brevoApiClient = null; // Store the initialized client
 try {
-    if (!BrevoSDK) {
-        throw new Error("Brevo SDK require failed earlier.");
+    if (!SibApiV3Sdk) {
+        throw new Error("sib-api-v3-sdk require failed.");
     }
-    // Check if ApiClient exists - This was the missing piece before
-    // If it doesn't exist directly, this attempt might still fail,
-    // but structure suggests it might be needed for global auth setup.
-    // Based on previous debug logs, ApiClient wasn't directly available,
-    // but ApiKeyAuth was. Let's try setting ApiKeyAuth directly if ApiClient fails.
-
-    let defaultClient;
-    // Attempt 1: Standard ApiClient instance approach (might fail based on logs)
-    if (BrevoSDK.ApiClient && BrevoSDK.ApiClient.instance) {
-        defaultClient = BrevoSDK.ApiClient.instance;
-        console.log("[Brevo Auth] Using ApiClient.instance");
-    } else {
-        // Fallback: If ApiClient wasn't found, try creating a dummy client or skip if not needed
-        // For now, let's assume the API instance handles its own auth if global fails.
-        console.warn("[Brevo Auth] BrevoSDK.ApiClient.instance not found. Proceeding without global defaultClient.");
-        defaultClient = null; // Indicate it wasn't found
+    if (!SibApiV3Sdk.ApiClient || !SibApiV3Sdk.ApiClient.instance) {
+        throw new Error("SibApiV3Sdk.ApiClient.instance not found.");
     }
 
-    // Set API Key Authentication globally IF defaultClient exists
-    if (defaultClient) {
-        if (!defaultClient.authentications || !defaultClient.authentications['api-key']) {
-             throw new Error("Could not access global authentications object.");
-        }
-        let apiKeyAuth = defaultClient.authentications['api-key'];
-        if (!process.env.SENDINBLUE_API_KEY) {
-            throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured.");
-        }
-        apiKeyAuth.apiKey = process.env.SENDINBLUE_API_KEY;
-        console.log("[Brevo Auth] Global API Key SET using defaultClient instance.");
+    brevoApiClient = SibApiV3Sdk.ApiClient.instance;
+    console.log("[Brevo Auth] Using SibApiV3Sdk.ApiClient.instance");
+
+    // Get the API key configuration from the client
+    let apiKeyAuth = brevoApiClient.authentications['api-key'];
+    if (!apiKeyAuth) {
+        throw new Error("Could not access authentications['api-key'] object.");
     }
-    // If defaultClient wasn't found, we hope the individual API instances handle auth correctly.
+
+    // Set the API key from environment variable
+    if (!process.env.SENDINBLUE_API_KEY) {
+        throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured.");
+    }
+    apiKeyAuth.apiKey = process.env.SENDINBLUE_API_KEY;
+    console.log("[Brevo Auth] API Key SET using SibApiV3Sdk.ApiClient.instance.");
 
 } catch (error) {
-    console.error("Error during Brevo Global Authentication Setup:", error);
-    // Continue execution, but Brevo might fail later if auth is strictly global
+    console.error("Error during Brevo Authentication Setup:", error);
+    brevoApiClient = null; // Ensure it's null if setup fails
 }
 // ------------------------------------
 
@@ -105,7 +95,8 @@ module.exports = async (req, res) => {
 
     // 4. Prepare Firestore and Brevo operations
     const firestorePromise = db ? saveToFirestore(name, email, message) : Promise.resolve({ success: false, error: "Firestore DB not initialized" });
-    const brevoPromise = sendBrevoEmail(name, email, message);
+    // Pass the initialized client to the email function
+    const brevoPromise = sendBrevoEmail(brevoApiClient, name, email, message);
 
     try {
         // Wait for both
@@ -133,6 +124,7 @@ module.exports = async (req, res) => {
 
 // --- Helper Function: Save to Firestore ---
 async function saveToFirestore(name, email, message) {
+    // db check happens before calling
     try {
         const submissionRef = db.collection('contact-submissions').doc();
         await submissionRef.set({
@@ -151,35 +143,24 @@ async function saveToFirestore(name, email, message) {
 
 
 // --- Helper Function: Send Email via Brevo ---
-async function sendBrevoEmail(name, email, message) {
+// Takes the initialized apiClient as an argument
+async function sendBrevoEmail(apiClient, name, email, message) {
     try {
         console.log("[Brevo] Entering sendBrevoEmail function.");
 
-        if (!BrevoSDK) { throw new Error("Brevo SDK require failed earlier."); }
-        if (!BrevoSDK.TransactionalEmailsApi) { throw new Error("BrevoSDK.TransactionalEmailsApi class is missing."); }
-        if (!BrevoSDK.SendSmtpEmail) { throw new Error("Brevo SendSmtpEmail class is missing."); }
-
-        // --- Instantiate API and Set Auth if needed ---
-        const apiInstance = new BrevoSDK.TransactionalEmailsApi();
-        console.log("[Brevo] TransactionalEmailsApi instance created.");
-
-        // If global auth setup failed (defaultClient was null), try setting auth on the instance
-        // This is the method that failed previously, but include as fallback
-        if (!apiInstance.authentications || !apiInstance.authentications['api-key']) {
-             console.warn("[Brevo] Could not access authentications on apiInstance. Assuming global auth worked.");
-             // If global auth also failed, this will likely fail during the API call.
-        } else {
-             let apiKeyAuthInstance = apiInstance.authentications['api-key'];
-             if (!process.env.SENDINBLUE_API_KEY) {
-                throw new Error("Brevo API Key (SENDINBLUE_API_KEY) is not configured.");
-             }
-             apiKeyAuthInstance.apiKey = process.env.SENDINBLUE_API_KEY;
-             console.log("[Brevo] API Key assigned to apiInstance authentication.");
+        // Check if authentication setup succeeded earlier
+        if (!apiClient) {
+            throw new Error("Brevo ApiClient was not initialized correctly (check auth setup).");
         }
-        // --- End Auth Setting ---
 
-        const sendSmtpEmail = new BrevoSDK.SendSmtpEmail();
-        console.log("[Brevo] SendSmtpEmail instance created.");
+        // Ensure necessary classes are available on the main SDK object
+        if (!SibApiV3Sdk.TransactionalEmailsApi) { throw new Error("SibApiV3Sdk.TransactionalEmailsApi class is missing."); }
+        if (!SibApiV3Sdk.SendSmtpEmail) { throw new Error("SibApiV3Sdk.SendSmtpEmail class is missing."); }
+
+        // Create instances using the main SDK object
+        const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        console.log("[Brevo] API and Email instances created.");
 
         // Sender details
         const SENDER_EMAIL = "harshitkumar9234@gmail.com";
@@ -202,8 +183,9 @@ async function sendBrevoEmail(name, email, message) {
         sendSmtpEmail.replyTo = { email: email, name: name };
         console.log("[Brevo] Email object configured.");
 
-        // Send the email
+        // Send the email using the API instance
         console.log("[Brevo] Calling apiInstance.sendTransacEmail...");
+        // The authentication set globally on apiClient.instance should be used automatically
         const data = await apiInstance.sendTransacEmail(sendSmtpEmail);
         console.log("Brevo API called successfully. Result:", data);
         return { success: true, result: data };
@@ -219,6 +201,8 @@ async function sendBrevoEmail(name, email, message) {
              } catch (e) {
                  errorMessage += ` Brevo Raw Error: ${error.response.text}`;
              }
+        } else if (error.code) {
+             errorMessage += ` (Code: ${error.code})`;
         }
         return { success: false, error: errorMessage };
     }
