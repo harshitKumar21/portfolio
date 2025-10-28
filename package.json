@@ -1,7 +1,7 @@
 {
   "name": "bmw-inspired-portfolio",
   "version": "1.0.0",
-  "description": "Portfolio Website",
+  "description": "Portfolio Website - Updated", 
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,13 +13,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "commonjs", 
   "bugs": {
     "url": "https://github.com/harshitkumar21/portfolio/issues"
   },
   "homepage": "https://github.com/harshitkumar21/portfolio#readme",
   "dependencies": {
-    "@getbrevo/brevo": "^3.0.1",
-    "firebase-admin": "^13.5.0"
+    "firebase-admin": "^13.5.0" 
   }
 }
